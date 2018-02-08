@@ -1,10 +1,12 @@
 package br.com.alura.agenda.dominio;
 
+import java.io.Serializable;
+
 /**
  * Created by rodrigo on 07/02/2018.
  */
 
-public class Aluno {
+public class Aluno implements Serializable {
 
     private Long id;
     private String nome;
