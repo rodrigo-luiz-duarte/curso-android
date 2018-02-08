@@ -40,7 +40,7 @@ public class FormularioHelper {
         aluno.setEndereco(campoEndereco.getText().toString());
         aluno.setTelefone(campoTelefone.getText().toString());
         aluno.setSite(campoSite.getText().toString());
-        aluno.setNota(Float.valueOf(campoNota.getProgress()));
+        aluno.setNota(Float.valueOf(campoNota.getRating()));
         return aluno;
     }
 

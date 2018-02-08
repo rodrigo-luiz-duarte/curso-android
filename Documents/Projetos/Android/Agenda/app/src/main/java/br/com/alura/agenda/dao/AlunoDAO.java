@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
     private static final String CAMPO_ENDERECO = "endereco";
     private static final String CAMPO_TELEFONE = "telefone";
     private static final String CAMPO_SITE = "site";
-    private static final String CAMPO_NOTA = "notar";
+    private static final String CAMPO_NOTA = "nota";
+    private static final String NOME_TABELA = "Aluno";
 
     public AlunoDAO(Context context) {
         super(context, NOME_BANCO_DE_DADOS, null, VERSAO_BANCO_DE_DADOS);
@@ -46,7 +48,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
     private void crieTabelaAluno(SQLiteDatabase db) {
 
-        StringBuilder sql = new StringBuilder("CREATE TABLE Aluno \n");
+        StringBuilder sql = new StringBuilder(String.format("CREATE TABLE %s \n", NOME_TABELA));
         sql.append("(");
         sql.append(String.format("%s INTEGER PRIMARY KEY,", CAMPO_ID));
         sql.append(String.format("%s TEXT NOT NULL,", CAMPO_NOME));
@@ -61,13 +63,21 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
     private void destruaTabelaAluno(SQLiteDatabase db) {
 
-        String sql = "DROP TABLE IF EXISTS Aluno;";
+        String sql = String.format("DROP TABLE IF EXISTS %s;", NOME_TABELA);
         db.execSQL(sql.toString());
     }
 
-    public void insere(Aluno aluno) {
+    public void insira(Aluno aluno) {
 
         SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues dados = getDadosAluno(aluno);
+
+        db.insert(NOME_TABELA, null, dados);
+    }
+
+    @NonNull
+    private ContentValues getDadosAluno(Aluno aluno) {
 
         ContentValues dados = new ContentValues();
         dados.put(CAMPO_NOME, aluno.getNome());
@@ -75,14 +85,13 @@ public class AlunoDAO extends SQLiteOpenHelper {
         dados.put(CAMPO_TELEFONE, aluno.getTelefone());
         dados.put(CAMPO_SITE, aluno.getSite());
         dados.put(CAMPO_NOTA, aluno.getNota());
-
-        db.insert("Aluno", null, dados);
+        return dados;
     }
 
     public List<Aluno> listeAluno() {
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM Aluno", null);
+        Cursor c = db.rawQuery(String.format("SELECT * FROM %s", NOME_TABELA), null);
         List<Aluno> alunos = new ArrayList<Aluno>();
 
         while (c.moveToNext()) {
@@ -107,6 +116,16 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         String[] params = {aluno.getId().toString()};
-        db.delete("Aluno", "id = ?", params);
+        db.delete(NOME_TABELA, "id = ?", params);
+    }
+
+    public void atualize(Aluno aluno) {
+
+        SQLiteDatabase db = getWritableDatabase();
+        String[] params = {aluno.getId().toString()};
+
+        ContentValues dados = getDadosAluno(aluno);
+
+        db.update(NOME_TABELA, dados, "id = ?", params);
     }
 }
