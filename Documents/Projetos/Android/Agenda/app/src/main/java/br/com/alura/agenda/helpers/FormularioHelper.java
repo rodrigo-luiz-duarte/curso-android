@@ -1,6 +1,9 @@
 package br.com.alura.agenda.helpers;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 
 import br.com.alura.agenda.FormularioActivity;
@@ -19,6 +22,7 @@ public class FormularioHelper {
     private EditText campoSite;
     private RatingBar campoNota;
     private Aluno aluno;
+    private ImageView campoFoto;
 
     public FormularioHelper(FormularioActivity formulario) {
 
@@ -27,6 +31,7 @@ public class FormularioHelper {
         this.campoTelefone = (EditText) formulario.findViewById(R.id.formulario_telefone);
         this.campoSite = (EditText) formulario.findViewById(R.id.formulario_site);
         this.campoNota = (RatingBar) formulario.findViewById(R.id.formulario_nota);
+        this.campoFoto = formulario.findViewById(R.id.formulario_foto_aluno);
 
     }
 
@@ -41,6 +46,12 @@ public class FormularioHelper {
         aluno.setTelefone(campoTelefone.getText().toString());
         aluno.setSite(campoSite.getText().toString());
         aluno.setNota(Float.valueOf(campoNota.getRating()));
+        aluno.setCaminhoFoto((String) campoFoto.getTag());
+
+        if (aluno.getCaminhoFoto() != null) {
+            carregaFoto(aluno.getCaminhoFoto());
+        }
+
         return aluno;
     }
 
@@ -52,6 +63,20 @@ public class FormularioHelper {
         campoTelefone.setText(aluno.getTelefone());
         campoSite.setText(aluno.getSite());
         campoNota.setRating(aluno.getNota());
+
+        if (aluno.getCaminhoFoto() != null) {
+            carregaFoto(aluno.getCaminhoFoto());
+        }
+
+    }
+
+    public void carregaFoto(String caminhoFoto) {
+
+        Bitmap bm = BitmapFactory.decodeFile(caminhoFoto);
+        bm = Bitmap.createScaledBitmap(bm, 100, 100, true);
+        campoFoto.setImageBitmap(bm);
+        campoFoto.setScaleType(ImageView.ScaleType.FIT_XY);
+        campoFoto.setTag(caminhoFoto);
 
     }
 }

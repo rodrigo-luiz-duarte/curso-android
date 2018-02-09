@@ -7,5 +7,5 @@ package br.com.alura.agenda.dao;
 public interface DbInfo {
 
     public static final String NOME_BANCO_DE_DADOS = "Agenda";
-    public static final int VERSAO_BANCO_DE_DADOS = 1;
+    public static final int VERSAO_BANCO_DE_DADOS = 2;
 }

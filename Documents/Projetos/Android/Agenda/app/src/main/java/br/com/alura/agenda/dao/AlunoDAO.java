@@ -27,6 +27,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
     private static final String CAMPO_TELEFONE = "telefone";
     private static final String CAMPO_SITE = "site";
     private static final String CAMPO_NOTA = "nota";
+    private static final String CAMPO_CAMINHO_FOTO = "caminhoFoto";
     private static final String NOME_TABELA = "Aluno";
 
     public AlunoDAO(Context context) {
@@ -42,20 +43,23 @@ public class AlunoDAO extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        this.destruaTabelaAluno(db);
-        this.crieTabelaAluno(db);
+        switch (oldVersion) {
+
+            case 1: this.upgradeParaVersao2(db);
+        }
     }
 
     private void crieTabelaAluno(SQLiteDatabase db) {
 
         StringBuilder sql = new StringBuilder(String.format("CREATE TABLE %s \n", NOME_TABELA));
         sql.append("(");
-        sql.append(String.format("%s INTEGER PRIMARY KEY,", CAMPO_ID));
-        sql.append(String.format("%s TEXT NOT NULL,", CAMPO_NOME));
-        sql.append(String.format("%s TEXT,", CAMPO_ENDERECO));
-        sql.append(String.format("%s TEXT,", CAMPO_TELEFONE));
-        sql.append(String.format("%s TEXT,", CAMPO_SITE));
-        sql.append(String.format("%s REAL", CAMPO_NOTA));
+        sql.append(String.format("%s INTEGER PRIMARY KEY", CAMPO_ID));
+        sql.append(String.format(", %s TEXT NOT NULL", CAMPO_NOME));
+        sql.append(String.format(", %s TEXT", CAMPO_ENDERECO));
+        sql.append(String.format(", %s TEXT", CAMPO_TELEFONE));
+        sql.append(String.format(", %s TEXT", CAMPO_SITE));
+        sql.append(String.format(", %s REAL", CAMPO_NOTA));
+        sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
         sql.append(")");
 
         db.execSQL(sql.toString());
@@ -85,6 +89,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
         dados.put(CAMPO_TELEFONE, aluno.getTelefone());
         dados.put(CAMPO_SITE, aluno.getSite());
         dados.put(CAMPO_NOTA, aluno.getNota());
+        dados.put(CAMPO_CAMINHO_FOTO, aluno.getCaminhoFoto());
+
         return dados;
     }
 
@@ -104,6 +110,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
             aluno.setTelefone(c.getString(c.getColumnIndex(CAMPO_TELEFONE)));
             aluno.setSite(c.getString(c.getColumnIndex(CAMPO_SITE)));
             aluno.setNota(c.getFloat(c.getColumnIndex(CAMPO_NOTA)));
+            aluno.setCaminhoFoto(c.getString(c.getColumnIndex(CAMPO_CAMINHO_FOTO)));
 
             alunos.add(aluno);
         }
@@ -127,5 +134,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
         ContentValues dados = getDadosAluno(aluno);
 
         db.update(NOME_TABELA, dados, "id = ?", params);
+    }
+
+    /**
+     * Migra para a versão 2 do banco de dados.
+     * @param db
+     */
+    private void upgradeParaVersao2(SQLiteDatabase db) {
+
+        StringBuilder sql = new StringBuilder(String.format("ALTER TABLE %s \n", NOME_TABELA));
+        sql.append(String.format(" ADD COLUMN %s TEXT;", CAMPO_CAMINHO_FOTO));
+
+        db.execSQL(sql.toString());
     }
 }

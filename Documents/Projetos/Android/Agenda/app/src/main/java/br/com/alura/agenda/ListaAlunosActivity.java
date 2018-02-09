@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ import br.com.alura.agenda.dominio.Aluno;
 
 public class ListaAlunosActivity extends AppCompatActivity {
 
-    private static final int ACAO_TELEFONAR = 1;
+    private static final int REQUEST_CODE_ACAO_TELEFONAR = 1;
 
     private Aluno alunoSelecionado;
 
@@ -158,7 +157,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
             alunoSelecionado = aluno;
 
             ActivityCompat.requestPermissions(ListaAlunosActivity.this,
-                    new String[]{Manifest.permission.CALL_PHONE}, ACAO_TELEFONAR);
+                    new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CODE_ACAO_TELEFONAR);
         } else {
 
             startActivity(intentLigar);
@@ -199,7 +198,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case ACAO_TELEFONAR: telefoneParaAluno(alunoSelecionado);
+            case REQUEST_CODE_ACAO_TELEFONAR: telefoneParaAluno(alunoSelecionado);
             break;
         }
 
