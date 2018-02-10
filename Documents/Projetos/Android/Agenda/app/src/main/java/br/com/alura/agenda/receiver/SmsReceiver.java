@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.telephony.gsm.SmsMessage;
+import android.telephony.SmsMessage;
 import android.widget.Toast;
 
 import br.com.alura.agenda.R;

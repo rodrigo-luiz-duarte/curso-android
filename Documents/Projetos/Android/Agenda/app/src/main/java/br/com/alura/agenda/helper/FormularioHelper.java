@@ -45,7 +45,7 @@ public class FormularioHelper {
         aluno.setEndereco(campoEndereco.getText().toString());
         aluno.setTelefone(campoTelefone.getText().toString());
         aluno.setSite(campoSite.getText().toString());
-        aluno.setNota(Float.valueOf(campoNota.getRating()));
+        aluno.setNota(Float.valueOf(campoNota.getRating() * 2));
         aluno.setCaminhoFoto((String) campoFoto.getTag());
 
         if (aluno.getCaminhoFoto() != null) {
@@ -62,7 +62,7 @@ public class FormularioHelper {
         campoEndereco.setText(aluno.getEndereco());
         campoTelefone.setText(aluno.getTelefone());
         campoSite.setText(aluno.getSite());
-        campoNota.setRating(aluno.getNota());
+        campoNota.setRating(aluno.getNota() / 2);
 
         if (aluno.getCaminhoFoto() != null) {
             carregaFoto(aluno.getCaminhoFoto());
