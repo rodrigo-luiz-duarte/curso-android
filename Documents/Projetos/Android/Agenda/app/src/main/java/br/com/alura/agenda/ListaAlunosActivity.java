@@ -12,19 +12,19 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.List;
 
-import br.com.alura.agenda.adapters.AlunoAdapter;
+import br.com.alura.agenda.adapter.AlunoAdapter;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
 
 public class ListaAlunosActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_ACAO_TELEFONAR = 1;
+    private static final int REQUEST_CODE_ACAO_RECEBER_SMS = 2;
 
     private Aluno alunoSelecionado;
 
@@ -36,6 +36,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
         this.registreBtnNovoAlunoListener();
         this.registerForContextMenu(getListaAlunos());
         this.registreListenerOnContexteMewnuItemClick();
+        this.solicitePermissaoReceberSMS();
 
     }
 
@@ -202,5 +203,15 @@ public class ListaAlunosActivity extends AppCompatActivity {
             break;
         }
 
+    }
+
+    private void solicitePermissaoReceberSMS() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(ListaAlunosActivity.this,
+                    new String[]{Manifest.permission.RECEIVE_SMS}, REQUEST_CODE_ACAO_RECEBER_SMS);
+        }
     }
 }

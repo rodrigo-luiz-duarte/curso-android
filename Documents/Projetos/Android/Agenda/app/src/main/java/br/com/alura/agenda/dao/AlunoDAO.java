@@ -147,4 +147,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         db.execSQL(sql.toString());
     }
+
+    public boolean isAluno(String telefone) {
+
+        String sql = String.format("SELECT * FROM %s WHERE telefone = ? ", NOME_TABELA);
+        Cursor cursor = getReadableDatabase().rawQuery(sql, new String[]{telefone});
+
+        int count = cursor.getCount();
+
+        cursor.close();
+
+        return count > 0;
+
+    }
 }

@@ -1,4 +1,4 @@
-package br.com.alura.agenda.helpers;
+package br.com.alura.agenda.helper;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
