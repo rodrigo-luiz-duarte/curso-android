@@ -55,11 +55,17 @@ public class ListaAlunosActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.enviar_notas) {
+        switch (item.getItemId()) {
 
-            new EnviaDadosServidor(this).execute();
+            case R.id.menu_enviar_notas:
+                new EnviaDadosServidor(this).execute();
+                break;
+
+            case R.id.menu_baixar_provas:
+                Intent vaiParaProvas = new Intent(this, ProvasActivity.class);
+                startActivity(vaiParaProvas);
+                break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
