@@ -15,16 +15,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.List;
 
 import br.com.alura.agenda.adapter.AlunoAdapter;
-import br.com.alura.agenda.converter.AlunoConverter;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
 import br.com.alura.agenda.task.EnviaDadosServidor;
-import br.com.alura.agenda.util.ClienteHttp;
 
 public class ListaAlunosActivity extends AppCompatActivity {
 
@@ -41,7 +38,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
         this.registreBtnNovoAlunoListener();
         this.registerForContextMenu(getListaAlunos());
         this.registreListenerOnContexteMewnuItemClick();
-        this.solicitePermissaoReceberSMS();
+        this.verifiquePermissaoReceberSMS();
 
     }
 
@@ -64,6 +61,11 @@ public class ListaAlunosActivity extends AppCompatActivity {
             case R.id.menu_baixar_provas:
                 Intent vaiParaProvas = new Intent(this, ProvasActivity.class);
                 startActivity(vaiParaProvas);
+                break;
+
+            case R.id.menu_mapa:
+                Intent vaiParaMapa = new Intent(this, MapaAlunosActivity.class);
+                startActivity(vaiParaMapa);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -234,7 +236,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
     }
 
-    private void solicitePermissaoReceberSMS() {
+    private void verifiquePermissaoReceberSMS() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
