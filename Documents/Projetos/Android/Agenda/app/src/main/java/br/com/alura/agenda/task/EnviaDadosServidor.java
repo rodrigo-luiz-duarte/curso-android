@@ -21,6 +21,8 @@ import br.com.alura.agenda.util.ClienteHttp;
 
 public class EnviaDadosServidor extends AsyncTask<Void, Void, String> {
 
+    private static final String URL_SERVICO = "https://www.caelum.com.br/mobile";
+
     private Context context;
     private ProgressDialog progressDialog;
 
@@ -41,7 +43,7 @@ public class EnviaDadosServidor extends AsyncTask<Void, Void, String> {
         String json = converter.toJson(alunos);
 
         ClienteHttp cliente = new ClienteHttp();
-        String resposta = cliente.post(json);
+        String resposta = cliente.post(json, URL_SERVICO);
 
         return resposta;
     }

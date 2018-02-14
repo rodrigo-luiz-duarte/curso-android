@@ -16,6 +16,7 @@ import java.io.File;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
 import br.com.alura.agenda.helper.FormularioHelper;
+import br.com.alura.agenda.task.SalvaAlunoTask;
 
 public class FormularioActivity extends AppCompatActivity {
 
@@ -85,6 +86,8 @@ public class FormularioActivity extends AppCompatActivity {
                 }
 
                 dao.close();
+
+                new SalvaAlunoTask(aluno).execute();
 
                 Toast.makeText(FormularioActivity.this,
                         String.format("Aluno %s salvo com sucesso!", aluno.getNome()),

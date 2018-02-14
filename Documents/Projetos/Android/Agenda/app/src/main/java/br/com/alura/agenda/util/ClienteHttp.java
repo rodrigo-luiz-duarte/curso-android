@@ -11,13 +11,11 @@ import java.util.Scanner;
 
 public class ClienteHttp {
 
-    private static final String URL_SERVICO = "https://www.caelum.com.br/mobile";
-
-    public String post(String json){
+    public String post(String json, String endereco){
 
         try {
             
-            URL url = new URL(URL_SERVICO);
+            URL url = new URL(endereco);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -41,4 +39,5 @@ public class ClienteHttp {
             throw new RuntimeException(e);
         }
     }
+
 }
