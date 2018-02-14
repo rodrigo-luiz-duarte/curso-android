@@ -50,7 +50,7 @@ public class AlunoConverter {
 
             js.object().key("id").value(aluno.getId())
                     .key("nome").value(aluno.getNome())
-                    .key("tlefone").value(aluno.getTelefone())
+                    .key("telefone").value(aluno.getTelefone())
                     .key("endereco").value(aluno.getEndereco())
                     .key("site").value(aluno.getSite())
                     .key("nota").value(aluno.getNota());
