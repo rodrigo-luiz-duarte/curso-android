@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import br.com.alura.agenda.dominio.Aluno;
 
@@ -45,7 +46,10 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         switch (oldVersion) {
 
-            case 1: this.upgradeParaVersao2(db);
+            case 1:
+                this.upgradeParaVersao2(db);
+            case 2:
+                this.upgradeParaVersao3(db);
         }
     }
 
@@ -71,20 +75,23 @@ public class AlunoDAO extends SQLiteOpenHelper {
         db.execSQL(sql.toString());
     }
 
-    public void insira(Aluno aluno) {
+    public void insira(Aluno aluno, SQLiteDatabase... db) {
 
-        SQLiteDatabase db = getWritableDatabase();
+        if (db == null || db.length == 0) {
+            db = new SQLiteDatabase[] {getWritableDatabase()};
+        }
+
+        aluno.setId(getUUID());
 
         ContentValues dados = getDadosAluno(aluno);
 
-        long id = db.insert(NOME_TABELA, null, dados);
-        aluno.setId(id);
+        db[0].insert(NOME_TABELA, null, dados);
     }
 
-    @NonNull
     private ContentValues getDadosAluno(Aluno aluno) {
 
         ContentValues dados = new ContentValues();
+        dados.put(CAMPO_ID, aluno.getId());
         dados.put(CAMPO_NOME, aluno.getNome());
         dados.put(CAMPO_ENDERECO, aluno.getEndereco());
         dados.put(CAMPO_TELEFONE, aluno.getTelefone());
@@ -98,47 +105,78 @@ public class AlunoDAO extends SQLiteOpenHelper {
     public List<Aluno> listeAluno() {
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery(String.format("SELECT * FROM %s", NOME_TABELA), null);
+        Cursor c = getCursorListaAluno(db);
+        return fetchListaAluno(c);
+    }
+
+    @NonNull
+    private List<Aluno> listeAluno(SQLiteDatabase db) {
+
+        Cursor c = getCursorListaAluno(db);
+        return fetchListaAluno(c);
+    }
+
+    @NonNull
+    private List<Aluno> fetchListaAluno(Cursor c) {
+
         List<Aluno> alunos = new ArrayList<Aluno>();
 
         while (c.moveToNext()) {
 
-            Aluno aluno = new Aluno();
-
-            aluno.setId(c.getLong(c.getColumnIndex(CAMPO_ID)));
-            aluno.setNome(c.getString(c.getColumnIndex(CAMPO_NOME)));
-            aluno.setEndereco(c.getString(c.getColumnIndex(CAMPO_ENDERECO)));
-            aluno.setTelefone(c.getString(c.getColumnIndex(CAMPO_TELEFONE)));
-            aluno.setSite(c.getString(c.getColumnIndex(CAMPO_SITE)));
-            aluno.setNota(c.getFloat(c.getColumnIndex(CAMPO_NOTA)));
-            aluno.setCaminhoFoto(c.getString(c.getColumnIndex(CAMPO_CAMINHO_FOTO)));
-
+            Aluno aluno = fetchAluno(c);
             alunos.add(aluno);
         }
+
         c.close();
 
         return alunos;
     }
 
-    public void delete(Aluno aluno) {
-
-        SQLiteDatabase db = getWritableDatabase();
-        String[] params = {aluno.getId().toString()};
-        db.delete(NOME_TABELA, "id = ?", params);
+    private Cursor getCursorListaAluno(SQLiteDatabase db) {
+        return db.rawQuery(String.format("SELECT * FROM %s", NOME_TABELA), null);
     }
 
-    public void atualize(Aluno aluno) {
+    @NonNull
+    private Aluno fetchAluno(Cursor c) {
+        Aluno aluno = new Aluno();
 
-        SQLiteDatabase db = getWritableDatabase();
+        aluno.setId(c.getString(c.getColumnIndex(CAMPO_ID)));
+        aluno.setNome(c.getString(c.getColumnIndex(CAMPO_NOME)));
+        aluno.setEndereco(c.getString(c.getColumnIndex(CAMPO_ENDERECO)));
+        aluno.setTelefone(c.getString(c.getColumnIndex(CAMPO_TELEFONE)));
+        aluno.setSite(c.getString(c.getColumnIndex(CAMPO_SITE)));
+        aluno.setNota(c.getFloat(c.getColumnIndex(CAMPO_NOTA)));
+        aluno.setCaminhoFoto(c.getString(c.getColumnIndex(CAMPO_CAMINHO_FOTO)));
+
+        return aluno;
+    }
+
+    public void delete(Aluno aluno, SQLiteDatabase... db) {
+
+        if (db == null || db.length == 0) {
+            db = new SQLiteDatabase[] {getWritableDatabase()};
+        }
+
+        String[] params = {aluno.getId().toString()};
+        db[0].delete(NOME_TABELA, "id = ?", params);
+    }
+
+    public void atualize(Aluno aluno, SQLiteDatabase... db) {
+
+        if (db == null || db.length == 0) {
+            db = new SQLiteDatabase[] {getWritableDatabase()};
+        }
+
         String[] params = {aluno.getId().toString()};
 
         ContentValues dados = getDadosAluno(aluno);
 
-        db.update(NOME_TABELA, dados, "id = ?", params);
+        db[0].update(NOME_TABELA, dados, "id = ?", params);
     }
 
     /**
      * Migra para a versão 2 do banco de dados.
+     *
      * @param db
      */
     private void upgradeParaVersao2(SQLiteDatabase db) {
@@ -160,5 +198,56 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         return count > 0;
 
+    }
+
+    private void upgradeParaVersao3(SQLiteDatabase db) {
+
+        String nomeNovaTabela = NOME_TABELA + "_nova";
+
+        this.crieNovaTabelaAluno(db, nomeNovaTabela);
+        this.migraDadosTabelaNova(db, nomeNovaTabela);
+    }
+
+    private void crieNovaTabelaAluno(SQLiteDatabase db, String nomeNovaTabela) {
+
+
+        StringBuilder sql = new StringBuilder(String.format("CREATE TABLE %s \n", nomeNovaTabela));
+        sql.append("(");
+        sql.append(String.format("%s CHAR(36) PRIMARY KEY", CAMPO_ID));
+        sql.append(String.format(", %s TEXT NOT NULL", CAMPO_NOME));
+        sql.append(String.format(", %s TEXT", CAMPO_ENDERECO));
+        sql.append(String.format(", %s TEXT", CAMPO_TELEFONE));
+        sql.append(String.format(", %s TEXT", CAMPO_SITE));
+        sql.append(String.format(", %s REAL", CAMPO_NOTA));
+        sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
+        sql.append(")");
+
+        db.execSQL(sql.toString());
+    }
+
+    private void migraDadosTabelaNova(SQLiteDatabase db, String nomeTabela) {
+
+        List<Aluno> alunos = this.listeAluno(db);
+
+        this.destruaTabelaAluno(db);
+        this.renomeieTabelaAlunoNova(db, nomeTabela, NOME_TABELA);
+
+        for (Aluno aluno : alunos) {
+
+            aluno.setId(this.getUUID());
+            this.atualize(aluno, db);
+        }
+
+    }
+
+    private String getUUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    private void renomeieTabelaAlunoNova(SQLiteDatabase db, String nomeTabela, String novoNomeTabela) {
+
+        StringBuilder sql = new StringBuilder(String.format("ALTER TABLE %s \n", nomeTabela));
+        sql.append(String.format("RENAME TO %s", novoNomeTabela));
+        db.execSQL(sql.toString());
     }
 }

@@ -3,6 +3,7 @@ package br.com.alura.agenda.adapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,12 +42,15 @@ public class AlunoAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return alunos.get(position).getId();
+        return alunos.get(position).hashCode();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         Aluno aluno = alunos.get(position);
+
+        Log.i("getView", "ID do aluno: " + aluno.getId());
 
         LayoutInflater inflater = LayoutInflater.from(context);
 
