@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,7 +22,14 @@ import java.util.List;
 import br.com.alura.agenda.adapter.AlunoAdapter;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
+import br.com.alura.agenda.dto.ListaAlunoDTO;
+import br.com.alura.agenda.retrofit.RetrofitInicializador;
 import br.com.alura.agenda.task.EnviaDadosServidor;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static br.com.alura.agenda.service.AlunoService.URL_API_ALUNO;
 
 public class ListaAlunosActivity extends AppCompatActivity {
 
@@ -102,7 +110,30 @@ public class ListaAlunosActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        this.sincronizeComServidor();
         this.carregueAlunos();
+    }
+
+    private void sincronizeComServidor() {
+
+        Call<ListaAlunoDTO> call = new RetrofitInicializador(URL_API_ALUNO).getAlunoService().sincronize();
+        call.enqueue(new Callback<ListaAlunoDTO>() {
+            @Override
+            public void onResponse(Call<ListaAlunoDTO> call, Response<ListaAlunoDTO> response) {
+                ListaAlunoDTO listaAlunoDTO = response.body();
+
+                AlunoDAO alunoDAO = new AlunoDAO(ListaAlunosActivity.this);
+                alunoDAO.sincronize(listaAlunoDTO.getAlunos());
+                alunoDAO.close();
+                carregueAlunos();
+            }
+
+            @Override
+            public void onFailure(Call<ListaAlunoDTO> call, Throwable t) {
+                Log.e("onFailure", "Sincronizacao com servidor falhou: ", t);
+            }
+        });
     }
 
     @Override

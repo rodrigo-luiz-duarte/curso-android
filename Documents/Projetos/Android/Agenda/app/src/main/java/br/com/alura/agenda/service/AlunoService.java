@@ -1,8 +1,10 @@
 package br.com.alura.agenda.service;
 
 import br.com.alura.agenda.dominio.Aluno;
+import br.com.alura.agenda.dto.ListaAlunoDTO;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -15,4 +17,7 @@ public interface AlunoService {
 
     @POST("aluno")
     Call<Void> salve(@Body Aluno aluno);
+
+    @GET("aluno")
+    Call<ListaAlunoDTO> sincronize();
 }
