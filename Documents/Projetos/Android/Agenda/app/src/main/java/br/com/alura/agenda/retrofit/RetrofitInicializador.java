@@ -1,5 +1,8 @@
 package br.com.alura.agenda.retrofit;
 
+import br.com.alura.agenda.service.AlunoService;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -13,9 +16,21 @@ public class RetrofitInicializador {
 
     public RetrofitInicializador(String urlBase) {
 
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient httpCliente = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(urlBase)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(httpCliente)
                 .build();
+    }
+
+    public AlunoService getAlunoService() {
+        return retrofit.create(AlunoService.class);
     }
 }

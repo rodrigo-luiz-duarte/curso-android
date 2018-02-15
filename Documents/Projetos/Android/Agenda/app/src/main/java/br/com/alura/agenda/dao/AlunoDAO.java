@@ -77,7 +77,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         ContentValues dados = getDadosAluno(aluno);
 
-        db.insert(NOME_TABELA, null, dados);
+        long id = db.insert(NOME_TABELA, null, dados);
+        aluno.setId(id);
     }
 
     @NonNull

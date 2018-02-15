@@ -41,24 +41,4 @@ public class AlunoConverter {
 
         return "";
     }
-
-    public String toJson(Aluno aluno) {
-
-        JSONStringer js = new JSONStringer();
-
-        try {
-
-            js.object().key("id").value(aluno.getId())
-                    .key("nome").value(aluno.getNome())
-                    .key("telefone").value(aluno.getTelefone())
-                    .key("endereco").value(aluno.getEndereco())
-                    .key("site").value(aluno.getSite())
-                    .key("nota").value(aluno.getNota());
-            js.endObject();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-         return js.toString();
-    }
 }

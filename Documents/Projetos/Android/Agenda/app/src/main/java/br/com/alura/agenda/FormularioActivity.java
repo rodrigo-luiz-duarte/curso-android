@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,7 +17,12 @@ import java.io.File;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
 import br.com.alura.agenda.helper.FormularioHelper;
-import br.com.alura.agenda.task.SalvaAlunoTask;
+import br.com.alura.agenda.retrofit.RetrofitInicializador;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static br.com.alura.agenda.service.AlunoService.URL_API_ALUNO;
 
 public class FormularioActivity extends AppCompatActivity {
 
@@ -87,7 +93,7 @@ public class FormularioActivity extends AppCompatActivity {
 
                 dao.close();
 
-                new SalvaAlunoTask(aluno).execute();
+                salveNoServidor(aluno);
 
                 Toast.makeText(FormularioActivity.this,
                         String.format("Aluno %s salvo com sucesso!", aluno.getNome()),
@@ -98,6 +104,21 @@ public class FormularioActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void salveNoServidor(Aluno aluno) {
+        Call<Void> call = new RetrofitInicializador(URL_API_ALUNO).getAlunoService().salve(aluno);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.i("onResponse", "Aluno inserido com sucesso.");
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("onFailure", "Falha ao inserir aluno.", t);
+            }
+        });
     }
 
     @Override
