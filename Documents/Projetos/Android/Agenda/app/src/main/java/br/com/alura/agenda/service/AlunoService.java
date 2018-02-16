@@ -15,8 +15,6 @@ import retrofit2.http.Path;
 
 public interface AlunoService {
 
-    public static final String URL_API_ALUNO = "http://197.50.24.102:8080/api/";
-
     @POST("aluno")
     Call<Void> salve(@Body Aluno aluno);
 

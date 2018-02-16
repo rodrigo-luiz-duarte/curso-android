@@ -1,6 +1,7 @@
 package br.com.alura.agenda.retrofit;
 
 import br.com.alura.agenda.service.AlunoService;
+import br.com.alura.agenda.service.DispositivoService;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -12,6 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitInicializador {
 
+    public static final String URL_API_ALUNO = "http://197.50.24.102:8080/api/";
     private final Retrofit retrofit;
 
     public RetrofitInicializador(String urlBase) {
@@ -32,5 +34,9 @@ public class RetrofitInicializador {
 
     public AlunoService getAlunoService() {
         return retrofit.create(AlunoService.class);
+    }
+
+    public DispositivoService getDispositivoSerice() {
+        return retrofit.create(DispositivoService.class);
     }
 }

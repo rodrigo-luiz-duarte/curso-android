@@ -57,7 +57,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         StringBuilder sql = new StringBuilder(String.format("CREATE TABLE %s \n", NOME_TABELA));
         sql.append("(");
-        sql.append(String.format("%s INTEGER PRIMARY KEY", CAMPO_ID));
+        sql.append(String.format("%s CHAR(36) PRIMARY KEY", CAMPO_ID));
         sql.append(String.format(", %s TEXT NOT NULL", CAMPO_NOME));
         sql.append(String.format(", %s TEXT", CAMPO_ENDERECO));
         sql.append(String.format(", %s TEXT", CAMPO_TELEFONE));

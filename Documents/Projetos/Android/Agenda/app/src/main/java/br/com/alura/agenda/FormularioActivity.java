@@ -2,9 +2,9 @@ package br.com.alura.agenda;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static br.com.alura.agenda.service.AlunoService.URL_API_ALUNO;
+import static br.com.alura.agenda.retrofit.RetrofitInicializador.URL_API_ALUNO;
 
 public class FormularioActivity extends AppCompatActivity {
 
