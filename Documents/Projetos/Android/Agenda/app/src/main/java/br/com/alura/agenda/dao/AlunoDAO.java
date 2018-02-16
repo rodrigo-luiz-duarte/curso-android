@@ -259,6 +259,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
             if (!existe(aluno)) {
                 this.insira(aluno);
+            } else {
+                this.atualize(aluno);
             }
         }
     }

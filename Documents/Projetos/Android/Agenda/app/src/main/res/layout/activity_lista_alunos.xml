@@ -7,10 +7,19 @@
     android:orientation="vertical"
     tools:context="br.com.alura.agenda.ListaAlunosActivity">
 
-    <ListView
-        android:id="@+id/lista_alunos"
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_lista_alunos"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content">
+
+        <ListView
+            android:id="@+id/lista_alunos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 
     <Button
         android:id="@+id/novo_aluno"

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -37,17 +39,33 @@ public class ListaAlunosActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_ACAO_RECEBER_SMS = 2;
 
     private Aluno alunoSelecionado;
+    private SwipeRefreshLayout swipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_alunos);
+
+        this.configureSwipeRefreshLayout();
         this.registreBtnNovoAlunoListener();
         this.registerForContextMenu(getListaAlunos());
         this.registreListenerOnContexteMewnuItemClick();
         this.verifiquePermissaoReceberSMS();
+        this.sincronizeComServidor();
 
+    }
+
+    private void configureSwipeRefreshLayout() {
+
+        swipeLayout = findViewById(R.id.swipe_lista_alunos);
+
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                sincronizeComServidor();
+            }
+        });
     }
 
     @Override
@@ -110,8 +128,6 @@ public class ListaAlunosActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        this.sincronizeComServidor();
         this.carregueAlunos();
     }
 
@@ -127,11 +143,13 @@ public class ListaAlunosActivity extends AppCompatActivity {
                 alunoDAO.sincronize(listaAlunoDTO.getAlunos());
                 alunoDAO.close();
                 carregueAlunos();
+                swipeLayout.setRefreshing(false);
             }
 
             @Override
             public void onFailure(Call<ListaAlunoDTO> call, Throwable t) {
                 Log.e("onFailure", "Sincronizacao com servidor falhou: ", t);
+                swipeLayout.setRefreshing(false);
             }
         });
     }
@@ -155,15 +173,29 @@ public class ListaAlunosActivity extends AppCompatActivity {
         MenuItem deletar = menu.add("Deletar");
         deletar.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 
-
             @Override
             public boolean onMenuItemClick(MenuItem item) {
 
-                AlunoDAO dao = new AlunoDAO(ListaAlunosActivity.this);
-                dao.delete(aluno);
-                dao.close();
+                Call<Void> call = new RetrofitInicializador(URL_API_ALUNO).getAlunoService().delete(aluno.getId());
 
-                carregueAlunos();
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        AlunoDAO dao = new AlunoDAO(ListaAlunosActivity.this);
+                        dao.delete(aluno);
+                        dao.close();
+                        carregueAlunos();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e("onFailure", "Exclusao no servidor falhou: ", t);
+
+                        Toast.makeText(ListaAlunosActivity.this,
+                                "Não foi possível remover o aluno", Toast.LENGTH_LONG).show();
+                    }
+                });
 
                 return false;
             }
