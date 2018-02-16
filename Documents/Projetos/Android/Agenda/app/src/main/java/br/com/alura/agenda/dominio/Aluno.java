@@ -15,6 +15,7 @@ public class Aluno implements Serializable {
     private String site;
     private Float nota;
     private String caminhoFoto;
+    private int desativado;
 
     public String getId() {
         return id;
@@ -70,6 +71,14 @@ public class Aluno implements Serializable {
 
     public void setCaminhoFoto(String caminhoFoto) {
         this.caminhoFoto = caminhoFoto;
+    }
+
+    public void setDesativado(int desativado) {
+        this.desativado = desativado;
+    }
+
+    public boolean isDesativado() {
+        return this.desativado == 1;
     }
 
     @Override
