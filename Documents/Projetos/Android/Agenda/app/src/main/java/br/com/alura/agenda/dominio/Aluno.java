@@ -16,6 +16,7 @@ public class Aluno implements Serializable {
     private Float nota;
     private String caminhoFoto;
     private int desativado;
+    private int sincronizado;
 
     public String getId() {
         return id;
@@ -81,8 +82,24 @@ public class Aluno implements Serializable {
         return this.desativado == 1;
     }
 
+    public int getSincronizado() {
+        return this.sincronizado;
+    }
+
+    public void setSincronizado(int sincronizado) {
+        this.sincronizado = sincronizado;
+    }
+
     @Override
     public String toString() {
         return String.format("%1$d - %2$s", getId(), getNome());
+    }
+
+    public void sincronize() {
+        this.sincronizado = 1;
+    }
+
+    public void dessincronize() {
+        this.sincronizado = 0;
     }
 }

@@ -81,6 +81,7 @@ public class FormularioActivity extends AppCompatActivity {
                 AlunoDAO dao = new AlunoDAO(this);
 
                 Aluno aluno = helper.getAluno();
+                aluno.dessincronize();
 
                 if (aluno != null) {
 

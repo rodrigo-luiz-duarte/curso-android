@@ -50,7 +50,7 @@ public class AlunoAdapter extends BaseAdapter {
 
         Aluno aluno = alunos.get(position);
 
-        Log.i("getView", "ID do aluno: " + aluno.getId());
+        Log.i("getView", "Aluno sincronizado: " + aluno.getSincronizado());
 
         LayoutInflater inflater = LayoutInflater.from(context);
 

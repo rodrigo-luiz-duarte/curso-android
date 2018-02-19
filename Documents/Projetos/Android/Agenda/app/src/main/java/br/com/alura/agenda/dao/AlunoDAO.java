@@ -22,6 +22,7 @@ import static br.com.alura.agenda.dao.DbInfo.VERSAO_BANCO_DE_DADOS;
 
 public class AlunoDAO extends SQLiteOpenHelper {
 
+    private static final String NOME_TABELA = "Aluno";
     private static final String CAMPO_ID = "id";
     private static final String CAMPO_NOME = "nome";
     private static final String CAMPO_ENDERECO = "endereco";
@@ -29,7 +30,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
     private static final String CAMPO_SITE = "site";
     private static final String CAMPO_NOTA = "nota";
     private static final String CAMPO_CAMINHO_FOTO = "caminhoFoto";
-    private static final String NOME_TABELA = "Aluno";
+    private static final String CAMPO_SINCRONIZADO = "sincronizado";
 
     public AlunoDAO(Context context) {
         super(context, NOME_BANCO_DE_DADOS, null, VERSAO_BANCO_DE_DADOS);
@@ -50,6 +51,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
                 this.upgradeParaVersao2(db);
             case 2:
                 this.upgradeParaVersao3(db);
+            case 3:
+                this.upgradeParaVersao4(db);
         }
     }
 
@@ -64,6 +67,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         sql.append(String.format(", %s TEXT", CAMPO_SITE));
         sql.append(String.format(", %s REAL", CAMPO_NOTA));
         sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
+        sql.append(String.format(", %s INT DEFAULT 0", CAMPO_SINCRONIZADO));
         sql.append(")");
 
         db.execSQL(sql.toString());
@@ -100,6 +104,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         dados.put(CAMPO_SITE, aluno.getSite());
         dados.put(CAMPO_NOTA, aluno.getNota());
         dados.put(CAMPO_CAMINHO_FOTO, aluno.getCaminhoFoto());
+        dados.put(CAMPO_SINCRONIZADO, aluno.getSincronizado());
 
         return dados;
     }
@@ -149,6 +154,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         aluno.setSite(c.getString(c.getColumnIndex(CAMPO_SITE)));
         aluno.setNota(c.getFloat(c.getColumnIndex(CAMPO_NOTA)));
         aluno.setCaminhoFoto(c.getString(c.getColumnIndex(CAMPO_CAMINHO_FOTO)));
+        aluno.setSincronizado(c.getInt(c.getColumnIndex(CAMPO_SINCRONIZADO)));
 
         return aluno;
     }
@@ -222,6 +228,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         sql.append(String.format(", %s TEXT", CAMPO_SITE));
         sql.append(String.format(", %s REAL", CAMPO_NOTA));
         sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
+        sql.append(String.format(", %s INT DEFAULT 0", CAMPO_SINCRONIZADO));
         sql.append(")");
 
         db.execSQL(sql.toString());
@@ -257,6 +264,8 @@ public class AlunoDAO extends SQLiteOpenHelper {
 
         for (Aluno aluno: alunos) {
 
+            aluno.sincronize();
+
             if (!existe(aluno) && !aluno.isDesativado()) {
 
                 this.insira(aluno);
@@ -282,5 +291,20 @@ public class AlunoDAO extends SQLiteOpenHelper {
         cursor.close();
 
         return count > 0;
+    }
+
+    private void upgradeParaVersao4(SQLiteDatabase db) {
+
+        StringBuilder sql = new StringBuilder(String.format("ALTER TABLE %s \n", NOME_TABELA));
+        sql.append(String.format(" ADD COLUMN %s INT DEFAULT 0;", CAMPO_SINCRONIZADO));
+
+        db.execSQL(sql.toString());
+    }
+
+    public List<Aluno> listeAlunoNaoSincronizado() {
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery(String.format("SELECT * FROM %s WHERE %s = 0", NOME_TABELA, CAMPO_SINCRONIZADO), null);
+        return fetchListaAluno(c);
     }
 }

@@ -28,9 +28,9 @@ import java.util.List;
 import br.com.alura.agenda.adapter.AlunoAdapter;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
-import br.com.alura.agenda.dto.ListaAlunoDTO;
 import br.com.alura.agenda.event.AtualizacaoAlunoEvent;
 import br.com.alura.agenda.retrofit.RetrofitInicializador;
+import br.com.alura.agenda.sincronizacao.AlunoSincronizador;
 import br.com.alura.agenda.task.EnviaDadosServidor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,7 +44,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_ACAO_RECEBER_SMS = 2;
 
     private Aluno alunoSelecionado;
-    private SwipeRefreshLayout swipeLayout;
+    private SwipeRefreshLayout swipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,14 +68,19 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void atualizeListaAlunoEvent(AtualizacaoAlunoEvent evento) {
+
+        if (swipe.isRefreshing()) {
+            swipe.setRefreshing(false);
+        }
+
         carregueAlunos();
     }
 
     private void configureSwipeRefreshLayout() {
 
-        swipeLayout = findViewById(R.id.swipe_lista_alunos);
+        swipe = findViewById(R.id.swipe_lista_alunos);
 
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 sincronizeComServidor();
@@ -148,25 +153,9 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
     private void sincronizeComServidor() {
 
-        Call<ListaAlunoDTO> call = new RetrofitInicializador(URL_API_ALUNO).getAlunoService().sincronize();
-        call.enqueue(new Callback<ListaAlunoDTO>() {
-            @Override
-            public void onResponse(Call<ListaAlunoDTO> call, Response<ListaAlunoDTO> response) {
-                ListaAlunoDTO listaAlunoDTO = response.body();
-
-                AlunoDAO alunoDAO = new AlunoDAO(ListaAlunosActivity.this);
-                alunoDAO.sincronize(listaAlunoDTO.getAlunos());
-                alunoDAO.close();
-                carregueAlunos();
-                swipeLayout.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<ListaAlunoDTO> call, Throwable t) {
-                Log.e("onFailure", "Sincronizacao com servidor falhou: ", t);
-                swipeLayout.setRefreshing(false);
-            }
-        });
+        AlunoSincronizador sincronizador = new AlunoSincronizador(this);
+        sincronizador.sincronizeComServidor();
+        sincronizador.sincronizeAlunosNaoSincronizados();
     }
 
     @Override
