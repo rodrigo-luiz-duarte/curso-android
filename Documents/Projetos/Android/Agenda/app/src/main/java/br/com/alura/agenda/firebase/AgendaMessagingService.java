@@ -14,6 +14,7 @@ import java.util.Map;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dto.ListaAlunoDTO;
 import br.com.alura.agenda.event.AtualizacaoAlunoEvent;
+import br.com.alura.agenda.sincronizacao.AlunoSincronizador;
 
 /**
  * Created by rodrigo on 16/02/2018.
@@ -43,9 +44,7 @@ public class AgendaMessagingService extends FirebaseMessagingService {
             final Gson gson = new GsonBuilder().create();
             ListaAlunoDTO listaAlunoDTO = gson.fromJson(json, ListaAlunoDTO.class);
 
-            AlunoDAO alunoDAO = new AlunoDAO(this);
-            alunoDAO.sincronize(listaAlunoDTO.getAlunos());
-            alunoDAO.close();
+            new AlunoSincronizador(this).sincronize(listaAlunoDTO);
 
             Log.i("Atualizacao FCM", "Aluno recebido atualizado com sucesso.");
 

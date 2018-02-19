@@ -78,6 +78,10 @@ public class Aluno implements Serializable {
         this.desativado = desativado;
     }
 
+    public int getDesativado() {
+        return desativado;
+    }
+
     public boolean isDesativado() {
         return this.desativado == 1;
     }
@@ -101,5 +105,10 @@ public class Aluno implements Serializable {
 
     public void dessincronize() {
         this.sincronizado = 0;
+    }
+
+    public void desative() {
+        this.desativado = 1;
+        dessincronize();
     }
 }

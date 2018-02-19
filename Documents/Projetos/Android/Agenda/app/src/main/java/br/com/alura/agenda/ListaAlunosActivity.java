@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +16,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -29,14 +27,8 @@ import br.com.alura.agenda.adapter.AlunoAdapter;
 import br.com.alura.agenda.dao.AlunoDAO;
 import br.com.alura.agenda.dominio.Aluno;
 import br.com.alura.agenda.event.AtualizacaoAlunoEvent;
-import br.com.alura.agenda.retrofit.RetrofitInicializador;
 import br.com.alura.agenda.sincronizacao.AlunoSincronizador;
 import br.com.alura.agenda.task.EnviaDadosServidor;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static br.com.alura.agenda.retrofit.RetrofitInicializador.URL_API_ALUNO;
 
 public class ListaAlunosActivity extends AppCompatActivity {
 
@@ -45,12 +37,15 @@ public class ListaAlunosActivity extends AppCompatActivity {
 
     private Aluno alunoSelecionado;
     private SwipeRefreshLayout swipe;
+    private AlunoSincronizador sincronizador;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_alunos);
+
+        sincronizador = new AlunoSincronizador(this);
 
         this.configureSwipeRefreshLayout();
         this.registreBtnNovoAlunoListener();
@@ -152,10 +147,7 @@ public class ListaAlunosActivity extends AppCompatActivity {
     }
 
     private void sincronizeComServidor() {
-
-        AlunoSincronizador sincronizador = new AlunoSincronizador(this);
         sincronizador.sincronizeComServidor();
-        sincronizador.sincronizeAlunosNaoSincronizados();
     }
 
     @Override
@@ -180,26 +172,12 @@ public class ListaAlunosActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
 
-                Call<Void> call = new RetrofitInicializador(URL_API_ALUNO).getAlunoService().delete(aluno.getId());
+                AlunoDAO dao = new AlunoDAO(ListaAlunosActivity.this);
+                dao.delete(aluno);
+                dao.close();
+                carregueAlunos();
 
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-
-                        AlunoDAO dao = new AlunoDAO(ListaAlunosActivity.this);
-                        dao.delete(aluno);
-                        dao.close();
-                        carregueAlunos();
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Log.e("onFailure", "Exclusao no servidor falhou: ", t);
-
-                        Toast.makeText(ListaAlunosActivity.this,
-                                "Não foi possível remover o aluno", Toast.LENGTH_LONG).show();
-                    }
-                });
+                sincronizador.delete(aluno);
 
                 return false;
             }

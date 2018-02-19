@@ -31,6 +31,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
     private static final String CAMPO_NOTA = "nota";
     private static final String CAMPO_CAMINHO_FOTO = "caminhoFoto";
     private static final String CAMPO_SINCRONIZADO = "sincronizado";
+    private static final String CAMPO_DESATIVADO = "desativado";
 
     public AlunoDAO(Context context) {
         super(context, NOME_BANCO_DE_DADOS, null, VERSAO_BANCO_DE_DADOS);
@@ -53,7 +54,17 @@ public class AlunoDAO extends SQLiteOpenHelper {
                 this.upgradeParaVersao3(db);
             case 3:
                 this.upgradeParaVersao4(db);
+            case 4:
+                this.upgradeParaVersao5(db);
         }
+    }
+
+    private void upgradeParaVersao5(SQLiteDatabase db) {
+
+        StringBuilder sql = new StringBuilder(String.format("ALTER TABLE %s \n", NOME_TABELA));
+        sql.append(String.format(" ADD COLUMN %s INT DEFAULT 0;", CAMPO_DESATIVADO));
+
+        db.execSQL(sql.toString());
     }
 
     private void crieTabelaAluno(SQLiteDatabase db) {
@@ -68,6 +79,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         sql.append(String.format(", %s REAL", CAMPO_NOTA));
         sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
         sql.append(String.format(", %s INT DEFAULT 0", CAMPO_SINCRONIZADO));
+        sql.append(String.format(", %s INT DEFAULT 0", CAMPO_DESATIVADO));
         sql.append(")");
 
         db.execSQL(sql.toString());
@@ -105,6 +117,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         dados.put(CAMPO_NOTA, aluno.getNota());
         dados.put(CAMPO_CAMINHO_FOTO, aluno.getCaminhoFoto());
         dados.put(CAMPO_SINCRONIZADO, aluno.getSincronizado());
+        dados.put(CAMPO_DESATIVADO, aluno.getDesativado());
 
         return dados;
     }
@@ -140,7 +153,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
     }
 
     private Cursor getCursorListaAluno(SQLiteDatabase db) {
-        return db.rawQuery(String.format("SELECT * FROM %s", NOME_TABELA), null);
+        return db.rawQuery(String.format("SELECT * FROM %s WHERE %s = 0", NOME_TABELA, CAMPO_DESATIVADO), null);
     }
 
     @NonNull
@@ -155,6 +168,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         aluno.setNota(c.getFloat(c.getColumnIndex(CAMPO_NOTA)));
         aluno.setCaminhoFoto(c.getString(c.getColumnIndex(CAMPO_CAMINHO_FOTO)));
         aluno.setSincronizado(c.getInt(c.getColumnIndex(CAMPO_SINCRONIZADO)));
+        aluno.setDesativado(c.getInt(c.getColumnIndex(CAMPO_DESATIVADO)));
 
         return aluno;
     }
@@ -165,8 +179,16 @@ public class AlunoDAO extends SQLiteOpenHelper {
             db = new SQLiteDatabase[] {getWritableDatabase()};
         }
 
-        String[] params = {aluno.getId().toString()};
-        db[0].delete(NOME_TABELA, "id = ?", params);
+        if (aluno.isDesativado()) {
+
+            String[] params = {aluno.getId().toString()};
+            db[0].delete(NOME_TABELA, "id = ?", params);
+
+        } else {
+
+            aluno.desative();
+            atualize(aluno, db);
+        }
     }
 
     public void atualize(Aluno aluno, SQLiteDatabase... db) {
@@ -229,6 +251,7 @@ public class AlunoDAO extends SQLiteOpenHelper {
         sql.append(String.format(", %s REAL", CAMPO_NOTA));
         sql.append(String.format(", %s TEXT", CAMPO_CAMINHO_FOTO));
         sql.append(String.format(", %s INT DEFAULT 0", CAMPO_SINCRONIZADO));
+        sql.append(String.format(", %s INT DEFAULT 0", CAMPO_DESATIVADO));
         sql.append(")");
 
         db.execSQL(sql.toString());
